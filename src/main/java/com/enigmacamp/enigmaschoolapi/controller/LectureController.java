@@ -1,7 +1,8 @@
 package com.enigmacamp.enigmaschoolapi.controller;
 
+import com.enigmacamp.enigmaschoolapi.exception.InvalidInputException;
+import com.enigmacamp.enigmaschoolapi.exception.NotFoundException;
 import com.enigmacamp.enigmaschoolapi.model.Lecture;
-import com.enigmacamp.enigmaschoolapi.model.response.ErrorResponse;
 import com.enigmacamp.enigmaschoolapi.model.response.SuccessResponse;
 import com.enigmacamp.enigmaschoolapi.service.LectureService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,19 +22,21 @@ public class LectureController {
 
     @GetMapping
     public ResponseEntity getAllLecture() {
+
         List<Lecture> lectures = lectureService.getAll();
 
         if (lectures.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("X01", "Lectures not found"));
+            throw new NotFoundException();
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse<>("Successful getting all lectures", lectures));
     }
 
     @PostMapping
-    public ResponseEntity addLecture(@RequestBody @Valid Lecture lecture, BindingResult errors) throws Exception {
+    public ResponseEntity addLecture(@RequestBody @Valid Lecture lecture, BindingResult errors) {
+
         if (errors.hasErrors()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("X02", "Invalid input"));
+            throw new InvalidInputException();
         }
 
         Lecture l = lectureService.add(lecture);

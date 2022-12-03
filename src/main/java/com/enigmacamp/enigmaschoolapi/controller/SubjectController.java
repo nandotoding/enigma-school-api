@@ -1,7 +1,8 @@
 package com.enigmacamp.enigmaschoolapi.controller;
 
+import com.enigmacamp.enigmaschoolapi.exception.InvalidInputException;
+import com.enigmacamp.enigmaschoolapi.exception.NotFoundException;
 import com.enigmacamp.enigmaschoolapi.model.Subject;
-import com.enigmacamp.enigmaschoolapi.model.response.ErrorResponse;
 import com.enigmacamp.enigmaschoolapi.model.response.SuccessResponse;
 import com.enigmacamp.enigmaschoolapi.service.SubjectService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +22,11 @@ public class SubjectController {
 
     @GetMapping
     public ResponseEntity getAllSubjects() {
+
         List<Subject> subjects = subjectService.getAll();
 
         if (subjects.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("X01", "Subjects not found"));
+            throw new NotFoundException();
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse<>("Successful getting all subjects", subjects));
@@ -32,8 +34,9 @@ public class SubjectController {
 
     @PostMapping
     public ResponseEntity addSubject(@RequestBody @Valid Subject subject, BindingResult errors) {
+
         if (errors.hasErrors()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("X02", "Invalid input"));
+            throw new InvalidInputException();
         }
 
         Subject s = subjectService.add(subject);

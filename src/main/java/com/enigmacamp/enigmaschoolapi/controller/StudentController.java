@@ -1,7 +1,8 @@
 package com.enigmacamp.enigmaschoolapi.controller;
 
+import com.enigmacamp.enigmaschoolapi.exception.InvalidInputException;
+import com.enigmacamp.enigmaschoolapi.exception.NotFoundException;
 import com.enigmacamp.enigmaschoolapi.model.Student;
-import com.enigmacamp.enigmaschoolapi.model.response.ErrorResponse;
 import com.enigmacamp.enigmaschoolapi.model.response.SuccessResponse;
 import com.enigmacamp.enigmaschoolapi.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +22,11 @@ public class StudentController {
 
     @GetMapping
     public ResponseEntity getAllStudents() {
+
         List<Student> students = studentService.getAll();
 
         if (students.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("X01", "Students not found"));
+            throw new NotFoundException();
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse<>("Successful getting all students", students));
@@ -32,8 +34,9 @@ public class StudentController {
 
     @PostMapping
     public ResponseEntity addStudent(@RequestBody @Valid Student student, BindingResult errors) {
+
         if (errors.hasErrors()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("X02", "Invalid input"));
+            throw new InvalidInputException();
         }
 
         Student s = studentService.add(student);
