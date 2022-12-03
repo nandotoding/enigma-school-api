@@ -3,8 +3,10 @@ package com.enigmacamp.enigmaschoolapi.controller;
 import com.enigmacamp.enigmaschoolapi.exception.InvalidInputException;
 import com.enigmacamp.enigmaschoolapi.exception.NotFoundException;
 import com.enigmacamp.enigmaschoolapi.model.Student;
+import com.enigmacamp.enigmaschoolapi.model.request.StudentRequest;
 import com.enigmacamp.enigmaschoolapi.model.response.SuccessResponse;
 import com.enigmacamp.enigmaschoolapi.service.StudentService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +19,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/students")
 public class StudentController {
+
     @Autowired
     private StudentService studentService;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @GetMapping
     public ResponseEntity getAllStudents() {
@@ -33,13 +39,14 @@ public class StudentController {
     }
 
     @PostMapping
-    public ResponseEntity addStudent(@RequestBody @Valid Student student, BindingResult errors) {
+    public ResponseEntity addStudent(@RequestBody @Valid StudentRequest studentRequest, BindingResult errors) {
 
         if (errors.hasErrors()) {
             throw new InvalidInputException();
         }
 
-        Student s = studentService.add(student);
-        return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse<>("Student has been added successfully", s));
+        Student student = modelMapper.map(studentRequest, Student.class);
+        Student studentData = studentService.add(student);
+        return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse<>("Student has been added successfully", studentData));
     }
 }
